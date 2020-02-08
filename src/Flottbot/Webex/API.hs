@@ -15,6 +15,7 @@ import           Network.HTTP.Client            ( Response
                                                 , responseBody
                                                 )
 import           Network.Wai.Handler.Warp
+import           Network.Wai.Handler.WarpTLS
 import           Network.Wai.Middleware.Gzip
 import           Network.WebexTeams
 import           Network.WebexTeams.Types
@@ -197,9 +198,11 @@ runWebexWebhookAPI = do
 
     ws <- replicateM (fromIntegral (cfg ^. webexCfgWebhookEventWorkerCount)) (async worker)
 
-    liftIO $ runSettings warpSettings (evApp ctx)
+    let tlsCerts = tlsSettings (toString (cfg ^. tlsCertFilePath)) (toString (cfg ^. tlsKeyFilePath))
+    liftIO $ runTLS tlsCerts warpSettings (evApp ctx)
 
     mapM_ wait ws
+
 
 -- Servant
 api :: Proxy API

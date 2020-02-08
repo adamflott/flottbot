@@ -17,7 +17,6 @@ Work in progress -- I wouldn't use it just yet...
 
 1. Upstream `webex-teams-api` changes
 1. HMAC secret decoding
-1. Support TLS in `warp` (maybe find an easy way to integrate with Let's Encrypt)
 1. Isolate/sandbox external commands somehow, leaning towards docker containers
 1. Include non-external process commands (`!help`, `!commands`, etc)
 1. Get working with chat rooms
@@ -53,6 +52,26 @@ A step by step series of examples that tell you how to get a development env run
 1. Create a webhook
 
 https://developer.webex.com/docs/api/v1/webhooks/create-a-webhook
+
+Create `create-webhook.json`
+```json
+{
+    "name": "flottbot-webhook-test",
+    "targetUrl": "https://your-domain",
+    "resource": "messages",
+    "event": "created"
+}
+```
+
+```sh
+$ export TOKEN=...
+$ curl -v -H "Authorization: Bearer ${TOKEN}" -H 'Accept: application/json' -H 'Content-Type: application/json' -d @create-webhook.json https://api.ciscospark.com/v1/webhooks
+```
+
+You'll get back something like
+```json
+{"id":"...","name":"flottbot-webhook-test","targetUrl":"https://your-domain","resource":"messages","event":"created","orgId":"...","createdBy":"...","appId":"...","ownedBy":"creator","status":"active","created":"2020-02-08T22:49:20.765Z"}
+```
 
 2. Create a config file, `flottbot.yaml` (can override with `-c` to `flottbot`)
 
@@ -102,6 +121,14 @@ $ flottbot -c flottbot.yaml
 ```
 
 5. Open a direct chat with the bot in the Teams app
+
+
+6. To delete the webhook
+
+```sh
+$ export webhook_id=""
+$ curl -v -H "Authorization: Bearer ${TOKEN}" -H 'Accept: application/json' -H 'Content-Type: application/json' -X DELETE https://api.ciscospark.com/v1/webhooks/$webhook_id
+```
 
 
 ## Running the tests

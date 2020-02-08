@@ -6,7 +6,9 @@ import           Flottbot.Prelude
 import           Data.YAML
 
 data Config = Config {
-    _loggingEnabled                        :: !Bool
+     _tlsCertFilePath                      :: !Text
+    , _tlsKeyFilePath                      :: !Text
+    , _loggingEnabled                      :: !Bool
     , _loggingQueueSize                    :: !Word32
     , _commandTimeoutInSeconds             :: !Word32
     , _webexCfgWebhookListen               :: !Text
@@ -26,6 +28,10 @@ instance FromYAML Config where
     parseYAML = withMap "flottbot config" $ \m ->
         Config
             <$> m
+            .:  "tlsCertFilePath"
+            <*> m
+            .:  "tlsKeyFilePath"
+            <*> m
             .:  "loggingEnabled"
             <*> m
             .:  "loggingQueueSize"

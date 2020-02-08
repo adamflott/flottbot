@@ -1,6 +1,8 @@
 module Flottbot.App
     ( appName
     , appConfigFilename
+    , tlsCertFilePath
+    , tlsKeyFilePath
     , Args(..)
     , argsConfigFilePath
     , argsVersion
