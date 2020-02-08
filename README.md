@@ -8,6 +8,10 @@ Screen shot:
 
 Currently doesn't support any security for external commands but will run things found in `commands` that have a valid `index.yaml`.
 
+## Status
+
+Work in progress -- I wouldn't use it just yet...
+
 
 ## TODO (in order of importance)
 
@@ -15,14 +19,14 @@ Currently doesn't support any security for external commands but will run things
 1. HMAC secret decoding
 1. Support TLS in `warp` (maybe find an easy way to integrate with Let's Encrypt)
 1. Isolate/sandbox external commands somehow, leaning towards docker containers
-1. Include non-external process commands (!help, !commands, etc)
+1. Include non-external process commands (`!help`, `!commands`, etc)
 1. Get working with chat rooms
 1. Turn `LoggingContext` into a monad transformer and merge with `App`
 1. Better replying to user things failed (currently logged)
 1. Turn log output into something more useful (currently `show a` on all `LogEvent`s)
 1. Some form of testing
 1. Dynamic reloading of config (via inotify)
-1. Dynamic reloading of command indexes (likely !reload-commands, maybe via inotify)
+1. Dynamic reloading of command indexes (likely `!reload-commands`, maybe via inotify)
 1. Graceful shutdown (see https://gist.github.com/NathanHowell/5435345)
 1. Compute metrics from `LogEvent`s and record somewhere
 1. Easier webhook creation/deleting
