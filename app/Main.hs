@@ -23,7 +23,7 @@ main :: IO ()
 main = runProgram =<< parseCLI
 
 runProgram :: Args -> IO ()
-runProgram (     Args _                  True ) = print (showVersion Paths_flottbot.version)
+runProgram (     Args _                  True ) = putStrLn (showVersion Paths_flottbot.version)
 runProgram (     Args Nothing            _    ) = putStrLn "A config file is required" >> exitFailure
 runProgram args@(Args (Just cfgFilePath) False) = do
     ecfg   <- configLoad cfgFilePath
