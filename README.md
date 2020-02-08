@@ -9,20 +9,24 @@ Screen shot:
 Currently doesn't support any security for external commands but will run things found in `commands` that have a valid `index.yaml`.
 
 
-## TODO
+## TODO (in order of importance)
 
 1. Upstream webex-teams-api changes
 1. HMAC secret decoding
 1. Support TLS in `warp`
 1. Include non-external process commands (!help, !commands, etc)
+1. Get working with chat rooms
+1. Turn `LoggingContext` into a monad transformer and merge with `App`
+1. Better replying to user things failed (currently logged)
+1. Turn log output into something more useful (currently `show a` on all `LogEvent`s)
+1. Some form of testing
 1. Dynamic reloading of config (via inotify)
 1. Dynamic reloading of command indexes (likely !reload-commands, maybe via inotify)
 1. Graceful shutdown (see https://gist.github.com/NathanHowell/5435345)
-1. Turn `LoggingContext` into a monad transformer and merge with `App`
+1. Easier webhook creation/deleting
 1. Less nesting in `handleMsg`
-1. Better replying to user things failed (currently logged)
-1. Turn log output into something more useful (currently `show a` on all `LogEvent`s)
-1. Testing
+1. Remove remaining warnings (not many)
+
 
 ## Getting Started
 
@@ -65,11 +69,19 @@ webexBotName: flottbot
 webexBotUserName: flottbot
 ```
 
-3. Run
+3. Build
+
+```sh
+$ stack install
+```
+
+4. Run
 
 ```sh
 $ flottbot -c flottbot.yaml
 ```
+
+5. Open a direct chat with the bot in the Teams app
 
 
 ## Running the tests
@@ -99,13 +111,13 @@ Open a PR.
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags).
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/adamflott/flottbot/tags).
 
 ## Authors
 
 * **Adam Flott** - *Initial work* - [adamflott](https://github.com/adamflott)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/adamflott/flottbot/contributors) who participated in this project.
 
 ## License
 
