@@ -23,10 +23,11 @@ Currently doesn't support any security for external commands but will run things
 1. Dynamic reloading of config (via inotify)
 1. Dynamic reloading of command indexes (likely !reload-commands, maybe via inotify)
 1. Graceful shutdown (see https://gist.github.com/NathanHowell/5435345)
+1. Compute metrics from `LogEvent`s and record somewhere
 1. Easier webhook creation/deleting
 1. Less nesting in `handleMsg`
 1. Remove remaining warnings (not many)
-
+1. User documentation
 
 ## Getting Started
 
