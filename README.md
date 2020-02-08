@@ -60,7 +60,7 @@ webexWebhookEventWorkerQueueSize: 10000
 
 webexAccessToken: <available once you have an account and create a bot, don't share this>
 webexWebhookId: <in response from create webhook api call>
-webexBotId: Y2lzY29zcGFyazovL3VzL0FQUExJQ0FUSU9OLzUxYjE3ZDdlLTIzNDAtNDljOS1iZDE0LThkMWEyNDk2ZmExZg
+webexBotId: <available once you have an account and create a bot>
 webexBotName: flottbot
 webexBotUserName: flottbot
 ```
