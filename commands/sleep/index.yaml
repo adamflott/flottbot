@@ -1,0 +1,8 @@
+---
+commandName: sleep
+enabled: true
+description: "sleep n seconds"
+ownerEmail: adam@adamflott.com
+usage: "!sleep <seconds>"
+exec: sleep.sh
+args: []

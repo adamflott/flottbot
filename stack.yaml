@@ -1,0 +1,17 @@
+#resolver: lts-14.20
+#resolver: nightly-2020-02-07
+resolver: nightly-2020-01-16
+
+packages:
+- .
+- './webex-teams-api/webex-teams-api'
+
+extra-deps:
+- wai-middleware-throttle-0.3.0.1@sha256:8da81c156abbcaee3bdda60763bb9780ae1b9ff447bd5580202c0e0f5f8f7bcb,2522
+- token-bucket-0.1.0.1@sha256:d8e85f2fc373939975e7ace7907baee177531ab6e43df94e330a2357e64a2d11,1899
+- chronos-1.1@sha256:1a5cc328d00431854ae38c55ed1230038e2ccf93da57682c40a1bc2bdca9c1a4,3721
+
+nix:
+  enable: true
+  packages:
+  - zlib

@@ -1,0 +1,148 @@
+name:                flottbot
+version:             0.0.1
+github:              "githubuser/adamflott/flottbot"
+license:             BSD3
+author:              "Adam Flott"
+maintainer:          "adam@adamflott.com"
+copyright:           "2020 Adam Flott"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/adamflott/flottbot#readme>
+
+ghc-options:
+  - -Wall
+  - -O
+  - -fwarn-unused-imports
+  - -Wincomplete-uni-patterns
+  - -Wincomplete-record-updates
+
+default-extensions:
+  - BangPatterns
+  - BinaryLiterals
+  - BlockArguments
+  - ConstraintKinds
+  - DataKinds
+  - DefaultSignatures
+  - DeriveAnyClass
+  - DeriveDataTypeable,
+  - DeriveFoldable
+  - DeriveFunctor
+  - DeriveGeneric
+  - DeriveLift
+  - DeriveTraversable
+  - DerivingStrategies
+  - EmptyCase
+  - EmptyDataDecls
+  - FlexibleContexts
+  - FlexibleInstances
+  - FunctionalDependencies
+  - GADTSyntax
+  - GADTs
+  - GeneralizedNewtypeDeriving
+  - LambdaCase
+  - MultiParamTypeClasses
+  - MultiWayIf
+  - NoMonomorphismRestriction
+  - NoImplicitPrelude
+  - NumDecimals
+  - NumericUnderscores
+  - OverloadedLists
+  - OverloadedStrings
+  - ParallelListComp
+  - PatternGuards
+  - PatternSynonyms
+  - RankNTypes
+  - RecordWildCards
+  - RecursiveDo
+  - ScopedTypeVariables
+  - StandaloneDeriving
+  - StaticPointers
+  - TemplateHaskell
+  - TypeApplications
+  - TypeFamilies
+  - TypeFamilyDependencies
+  - TypeInType
+  - TypeOperators
+  - TypeSynonymInstances
+  - UnicodeSyntax
+  - ViewPatterns
+
+dependencies:
+- base >= 4.7 && < 5
+- HTTP
+- HsYAML
+- aeson
+- async
+- bytestring
+- chronos
+- clock
+- containers
+- data-default
+- directory
+- filemanip
+- filepath
+- hdaemonize
+- http-client
+- http-types
+- human-readable-duration
+- lens
+- lens-aeson
+- megaparsec
+- mtl
+- network
+- optparse-applicative
+- relude
+- req
+- serialise
+- servant
+- servant-server
+- text
+- time
+- typed-process
+- unagi-chan
+- unix
+- unliftio
+- unliftio
+- unordered-containers
+- uri-bytestring
+- wai
+- wai-extra
+- wai-middleware-throttle
+- warp
+- warp-tls
+- webex-teams-api
+
+library:
+  source-dirs: src
+
+executables:
+  flottbot:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - flottbot
+
+tests:
+  flottbot-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - flottbot

@@ -1,0 +1,8 @@
+---
+commandName: echo
+enabled: true
+description: "Echo input"
+ownerEmail: adam@adamflott.com
+usage: "!echo <input-text>"
+exec: echo.sh
+args: []
