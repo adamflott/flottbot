@@ -11,9 +11,10 @@ Currently doesn't support any security for external commands but will run things
 
 ## TODO (in order of importance)
 
-1. Upstream webex-teams-api changes
+1. Upstream `webex-teams-api` changes
 1. HMAC secret decoding
-1. Support TLS in `warp`
+1. Support TLS in `warp` (maybe find an easy way to integrate with Let's Encrypt)
+1. Isolate/sandbox external commands somehow, leaning towards docker containers
 1. Include non-external process commands (!help, !commands, etc)
 1. Get working with chat rooms
 1. Turn `LoggingContext` into a monad transformer and merge with `App`
@@ -79,6 +80,20 @@ $ stack install
 4. Run
 
 ```sh
+$ flottbot -h
+flottbot - a bot for Cisco Webex Teams
+
+Usage: flottbot [-c|--config-file FILE] [-v|--version]
+  Cisco Webex Teams bot
+
+Available options:
+  -h,--help                Show this help text
+  -c,--config-file FILE    YAML config file path (default: "flottbot.yaml")
+  -v,--version             Print version
+
+$ flottbot -v
+0.0.1
+
 $ flottbot -c flottbot.yaml
 ```
 
