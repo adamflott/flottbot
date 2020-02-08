@@ -6,12 +6,18 @@ Screen shot:
 
 ![screenshot](flottbot-screenshot.png)
 
-Currently doesn't support any security for external commands but will run things found in `commands` that have a valid `index.yaml`.
+Currently doesn't support any security for external commands but will run things
+found in `commands` that have a valid `index.yaml`. This model allows you to
+write the bot commands in any language.
 
-## Status
+## Features
 
 Work in progress -- I wouldn't use it just yet...
 
+* Webhook server runs in TLS
+* Commands can be written in any language, they are invoked as regular system processes
+* Commands are forced to timeout after a configurable amount of time
+* No dependencies once compiled
 
 ## TODO (in order of importance)
 
@@ -42,8 +48,8 @@ These instructions will get you a copy of the project up and running on your loc
 What things you need to install the software and how to install them
 
 1. Cisco Webex Teams account
-2. open TCP port on the internet so the Webex API can contact it
-3. `stack`
+2. open TCP port on the internet so the Webex API can contact it (specify the URL when you create the webhook)
+3. `stack` from https://tech.fpcomplete.com/haskell/get-started and https://www.stackage.org/
 
 ### Installing
 
@@ -77,6 +83,9 @@ You'll get back something like
 
 ```yaml
 ---
+tlsCertFilePath: mydomain.com.fullchain.pem
+tlsKeyFilePath: mydomain.com.key
+
 loggingEnabled: true
 loggingQueueSize: 10000
 
