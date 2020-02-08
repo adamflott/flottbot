@@ -1,0 +1,5 @@
+resolver: nightly-2019-05-08
+packages:
+- webex-teams-api
+- webex-teams-conduit
+- webex-teams-pipes
