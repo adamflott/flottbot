@@ -30,6 +30,8 @@ Work in progress -- I wouldn't use it just yet...
 1. Better replying to user things failed (currently logged)
 1. Turn log output into something more useful (currently `show a` on all `LogEvent`s)
 1. Some form of testing
+1. A way to specify how the command wants it's input, either simple (just send what text the user sent) or a JSON blob with more details
+1. Prevent malicious behavior with truncating input, etc
 1. Dynamic reloading of config (via inotify)
 1. Dynamic reloading of command indexes (likely `!reload-commands`, maybe via inotify)
 1. Graceful shutdown (see https://gist.github.com/NathanHowell/5435345)
@@ -177,7 +179,7 @@ See also the list of [contributors](https://github.com/adamflott/flottbot/contri
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
 ## Acknowledgments
 
