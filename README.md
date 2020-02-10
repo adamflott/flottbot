@@ -24,7 +24,6 @@ Work in progress -- I wouldn't use it just yet...
 1. Upstream `webex-teams-api` changes
 1. HMAC secret decoding
 1. Isolate/sandbox external commands somehow, leaning towards docker containers
-1. Include non-external process commands (`!help`, `!commands`, etc)
 1. Get working with chat rooms
 1. Turn `LoggingContext` into a monad transformer and merge with `App`
 1. Better replying to user things failed (currently logged)

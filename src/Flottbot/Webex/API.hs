@@ -81,6 +81,7 @@ handleMsg cfg cmds ev m = do
 
             -- remove '!' and split at first space
             let (userCmd, userArgs) = Data.Text.breakOn " " (Data.Text.drop 1 mt)
+                userArgsCleaned     = Data.Text.strip userArgs
 
             case getCommand userCmd cmds of
                 Nothing -> do
@@ -89,25 +90,49 @@ handleMsg cfg cmds ev m = do
                 Just cmd -> do
                     cwd <- liftIO getCurrentDirectory
 
-                    let fullCmdPath = toText (cwd </> "commands" </> toString userCmd </> toString (_commandExec cmd))
-                        cmdArgs     = _commandArgs cmd ++ [userArgs]
-                    (dur, cmdResp) <- liftIO $ stopwatch $ runCommand fullCmdPath cmdArgs (cfg ^. commandTimeoutInSeconds)
+                    case cmd ^. commandType of
+                        (CommandTypeExec e a) -> do
+                            let fullCmdPath = toText (cwd </> "commands" </> toString userCmd </> toString e)
+                                cmdArgs     = a ++ [userArgsCleaned]
+                            (dur, cmdResp) <- liftIO $ stopwatch $ runCommand fullCmdPath
+                                                                              cmdArgs
+                                                                              (cfg ^. commandTimeoutInSeconds)
 
-                    case cmdResp of
-                        Left  (ec, err) -> newLogEvent (LogEventCommandRunResult fullCmdPath cmdArgs ec err dur)
-                            -- TODO reply to channel command failed
-                        Right out       -> do
-                            newLogEvent (LogEventCommandRunResult fullCmdPath cmdArgs ExitSuccess out dur)
-                            if Data.Text.length out > 0
-                                then do
-                                    let message =
-                                            CreateMessage roomId Nothing Nothing (Just (MessageText out)) Nothing Nothing
-                                    -- TODO http-client-0.6.4:Network.HTTP.Client.Types.Response Message’
-                                    (apiDur, tr) <- liftIO $ stopwatch $ createEntity auth def message
-                                    newLogEvent (LogEventWebexAPIResponse tr apiDur)
+                            case cmdResp of
+                                Left  (ec, err) -> newLogEvent (LogEventCommandRunResult fullCmdPath cmdArgs ec err dur)
+                                -- TODO reply to channel command failed
+                                Right out       -> do
+                                    newLogEvent (LogEventCommandRunResult fullCmdPath cmdArgs ExitSuccess out dur)
+                                    if Data.Text.length out > 0
+                                        then do
+                                            let
+                                                message = CreateMessage roomId
+                                                                        Nothing
+                                                                        Nothing
+                                                                        (Just (MessageText out))
+                                                                        Nothing
+                                                                        Nothing
+                                            -- TODO http-client-0.6.4:Network.HTTP.Client.Types.Response Message’
+                                            (apiDur, tr) <- liftIO $ stopwatch $ createEntity auth def message
+                                            newLogEvent (LogEventWebexAPIResponse tr apiDur)
 
-                                    pure ()
-                                else pure ()
+                                            pure ()
+                                        else pure ()
+                        (CommandTypeInternal h) -> case h of
+                            CommandTypeInternalHandlerIO h' -> do
+                                _ <- liftIO $ h' (userCmd, userArgsCleaned, cmds)
+                                pure ()
+                            CommandTypeInternalHandlerPure h' -> do
+                                let (Right out) = h' (userCmd, userArgsCleaned, cmds)
+
+                                let message = CreateMessage roomId Nothing Nothing (Just (MessageText out)) Nothing Nothing
+                                -- TODO http-client-0.6.4:Network.HTTP.Client.Types.Response Message’
+                                (apiDur, tr) <- liftIO $ stopwatch $ createEntity auth def message
+                                newLogEvent (LogEventWebexAPIResponse tr apiDur)
+
+                                pure ()
+
+                        CommandTypeUnknown -> pure ()
 
 
 getCommand :: Text -> Commands -> Maybe Command

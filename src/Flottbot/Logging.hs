@@ -25,7 +25,7 @@ import           UnliftIO.Concurrent            ( ThreadId
 
 -- local
 import           Flottbot.Config
-
+import           Flottbot.Command
 
 data Operation
     = OpStarted
@@ -40,6 +40,7 @@ data LogEvent
     | LogEventConenctionClose !SockAddr
     | LogEventEnqueueWebexMessage !WebhookNotify
     | LogEventDequeueWebexMessage !WebhookNotify
+    | LogEventCommandNew !Command
     | LogEventCommandNotFound !Text
     | LogEventCommandRunResult !Text ![Text] ExitCode !Text !Timespan
     | LogEventHTTPRequest !Request !Status !(Maybe Integer)

@@ -12,8 +12,10 @@ import           Options.Applicative           as Opt
 -- local
 import           Flottbot.App
 import           Flottbot.Command
-import           Flottbot.Webex.API
+import           Flottbot.Commands
 import           Flottbot.Logging
+import           Flottbot.Webex.API
+
 
 -- local (via cabal)
 import           Paths_flottbot                 ( version )
@@ -31,11 +33,15 @@ runProgram args@(Args (Just cfgFilePath) False) = do
 
     ecmds  <- commandsLoad
     cmds   <- checkCommandsOrExit ecmds
+    let allCmds = cmds <> internalCmds cmds
+
 
     logCtx <- newLoggingCtx cfg
     startLogger logCtx
 
-    appCtx <- newAppCtx args cfg cmds logCtx
+    mapM_ (logEvent logCtx . LogEventCommandNew) allCmds
+
+    appCtx <- newAppCtx args cfg allCmds logCtx
 
     logEvent logCtx (LogEventConfig cfg)
 

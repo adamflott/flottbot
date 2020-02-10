@@ -4,5 +4,7 @@ enabled: true
 description: "Output system uptime"
 ownerEmail: adam@adamflott.com
 usage: "!system-uptime"
-exec: system-uptime.sh
-args: []
+command:
+  type: executable
+  exec: system-uptime.sh
+  args: []
