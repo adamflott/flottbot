@@ -18,6 +18,7 @@ Work in progress -- I wouldn't use it just yet...
 * Commands can be written in any language, they are invoked as regular system processes
 * Commands are forced to timeout after a configurable amount of time
 * No dependencies once compiled
+* Portable across Linux, OSX, and Windows
 
 ## TODO (in order of importance)
 
@@ -25,7 +26,6 @@ Work in progress -- I wouldn't use it just yet...
 1. HMAC secret decoding
 1. Isolate/sandbox external commands somehow, leaning towards docker containers
 1. Get working with chat rooms
-1. Turn `LoggingContext` into a monad transformer and merge with `App`
 1. Better replying to user things failed (currently logged)
 1. Turn log output into something more useful (currently `show a` on all `LogEvent`s)
 1. Some form of testing
@@ -33,10 +33,11 @@ Work in progress -- I wouldn't use it just yet...
 1. Prevent malicious behavior with truncating input, etc
 1. Dynamic reloading of config (via inotify)
 1. Dynamic reloading of command indexes (likely `!reload-commands`, maybe via inotify)
-1. Graceful shutdown (see https://gist.github.com/NathanHowell/5435345)
+1. Add Unix signal handling
 1. Compute metrics from `LogEvent`s and record somewhere
 1. Easier webhook creation/deleting
 1. Less nesting in `handleMsg`
+1. Commands enabled per team/room (likely annoying as rooms have a long ugly opaque string as an id)
 1. Remove remaining warnings (not many)
 1. User documentation
 
@@ -183,3 +184,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgments
 
 * Wouldn't have bothered if https://hackage.haskell.org/package/webex-teams-api didn't exist
+* Thanks to [Nathan Howell](https://github.com/NathanHowell) for a graceful shutdown [gist](https://gist.github.com/NathanHowell/5435345)

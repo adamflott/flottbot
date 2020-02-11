@@ -8,6 +8,7 @@ import           Data.Version                   ( showVersion )
 -- Hackage
 import           Data.YAML                     as YAML
 import           Options.Applicative           as Opt
+import           UnliftIO
 
 -- local
 import           Flottbot.App
@@ -28,24 +29,36 @@ runProgram :: Args -> IO ()
 runProgram (     Args _                  True ) = putStrLn (showVersion Paths_flottbot.version)
 runProgram (     Args Nothing            _    ) = putStrLn "A config file is required" >> exitFailure
 runProgram args@(Args (Just cfgFilePath) False) = do
-    ecfg   <- configLoad cfgFilePath
-    cfg    <- checkCfgOrExit ecfg
+    ecfg  <- configLoad cfgFilePath
+    cfg   <- checkCfgOrExit ecfg
 
-    ecmds  <- commandsLoad
-    cmds   <- checkCommandsOrExit ecmds
+    ecmds <- commandsLoad
+    cmds  <- checkCommandsOrExit ecmds
     let allCmds = cmds <> internalCmds cmds
 
 
-    logCtx <- newLoggingCtx cfg
-    startLogger logCtx
+    logCtx         <- newLoggingCtx cfg
+    logAsyncHandle <- startLogger logCtx
 
     mapM_ (logEvent logCtx . LogEventCommandNew) allCmds
 
-    appCtx <- newAppCtx args cfg allCmds logCtx
+    shutdown          <- newEmptyTMVarIO
+    activeConnections <- UnliftIO.newTVarIO (0 :: Int)
+
+    appCtx            <- newAppCtx args cfg allCmds logCtx
 
     logEvent logCtx (LogEventConfig cfg)
 
-    runReaderT (runApp runWebexWebhookAPI) appCtx
+    void $ async $ runReaderT (runApp (runWebexWebhookAPI shutdown activeConnections)) appCtx
+
+    UnliftIO.atomically $ do
+        void $ takeTMVar shutdown
+        conns <- readTVar activeConnections
+        when (conns /= 0) UnliftIO.retrySTM
+
+    cancel logAsyncHandle
+    wait logAsyncHandle
+
 
 checkCfgOrExit :: Either (Pos, String) Config -> IO Config
 checkCfgOrExit c = case c of

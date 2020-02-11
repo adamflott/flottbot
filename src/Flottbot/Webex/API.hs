@@ -10,6 +10,7 @@ import           System.Timeout
 
 import           Chronos
 import           Control.Concurrent.Chan.Unagi.Bounded
+                                               as Chan
 import           Data.Text
 import           Network.HTTP.Client            ( Response
                                                 , responseBody
@@ -23,6 +24,7 @@ import           Servant
 import           System.Directory
 import           System.FilePath.Posix
 import           System.Process.Typed
+import           UnliftIO.STM
 import           UnliftIO.Async
 import qualified Data.Map.Strict               as Map
 
@@ -33,10 +35,11 @@ import           Flottbot.Logging
 
 
 -- HTTP API
-type API = APIIndex :<|> APIEventNew
+type API = APIIndex :<|> APIEventNew :<|> APIShutdown
+
 type APIIndex = Get '[PlainText] NoContent
 type APIEventNew = ReqBody '[JSON] WebhookNotify :> PostNoContent '[JSON] NoContent
-
+type APIShutdown = "shutdown" :> Get '[PlainText] NoContent
 
 webexDomain :: IsString a => a
 webexDomain = "webex.bot"
@@ -52,7 +55,7 @@ worker = do
         continueIfNotFromBot = maybe worker (\(Email e) -> if e == fullBotName then worker else pure ())
 
     -- blocks until an item is available
-    ev <- liftIO $ readChan q
+    ev <- liftIO $ Chan.readChan q
     newLogEvent (LogEventDequeueWebexMessage ev)
 
     continueIfNotFromBot (getFrom ev)
@@ -179,35 +182,48 @@ getRoomId ev = case webhookNotifyData ev of
 
 
 -- Handlers
-server :: AppContext -> Server API
-server st = idx :<|> newEvent st
+server :: AppContext -> TMVar () -> Server API
+server st t = wwwIdx :<|> wwwNewEvent st :<|> wwwShutdown t
 
-idx :: Handler NoContent
-idx = pure NoContent
+wwwIdx :: Handler NoContent
+wwwIdx = pure NoContent
 
-newEvent :: AppContext -> WebhookNotify -> Handler NoContent
-newEvent ctx ev = do
+wwwNewEvent :: AppContext -> WebhookNotify -> Handler NoContent
+wwwNewEvent ctx ev = do
     let q = ctx ^. appCtxWebex . webexCtxQueueInEv
 
     liftIO $ do
         logEvent (ctx ^. appCtxLog) (LogEventEnqueueWebexMessage ev)
-        writeChan q ev
+        Chan.writeChan q ev
 
-    return NoContent
+    pure NoContent
+
+wwwShutdown :: TMVar () -> Handler NoContent
+wwwShutdown t = do
+    shouldRun <- UnliftIO.STM.atomically $ isEmptyTMVar t
+    if shouldRun then UnliftIO.STM.atomically $ putTMVar t () else throwError err503
+    pure NoContent
 
 -- App
-evApp :: AppContext -> Application
-evApp st = serve api (server st)
+evApp :: AppContext -> TMVar () -> Application
+evApp ctx t = serve api (server ctx t)
 
-runWebexWebhookAPI :: App ()
-runWebexWebhookAPI = do
+runWebexWebhookAPI :: TMVar () -> TVar Int -> App ()
+runWebexWebhookAPI shutdown activeConnections = do
     cfg    <- getCfg
     ctx    <- getCtx
     logCtx <- getLogCtx
 
-    let logOpenConnection sa = logEvent logCtx (LogEventConenctionOpen sa)
-        logCloseConnection sa = logEvent logCtx (LogEventConenctionClose sa)
-        logRequest req status fileSize = logEvent logCtx (LogEventHTTPRequest req status fileSize)
+    let logRequest req status fileSize = logEvent logCtx (LogEventHTTPRequest req status fileSize)
+
+    let onOpen sa = do
+            UnliftIO.STM.atomically $ modifyTVar' activeConnections (+ 1)
+            logEvent logCtx (LogEventConenctionOpen sa)
+            pure True
+
+    let onClose sa = do
+            logEvent logCtx (LogEventConenctionClose sa)
+            UnliftIO.STM.atomically $ modifyTVar' activeConnections (subtract 1)
 
     let warpSettings =
             defaultSettings
@@ -215,8 +231,8 @@ runWebexWebhookAPI = do
                 & setTimeout 10 -- TODO add to config
                 & setPort (fromIntegral (cfg ^. webexCfgWebhookPort))
                 & setLogger logRequest
-                & setOnOpen (\sa -> logOpenConnection sa >> pure True)
-                & setOnClose logCloseConnection
+                & setOnOpen onOpen
+                & setOnClose onClose
                 & setBeforeMainLoop (logEvent logCtx (LogEventOp OpStarted))
                 & setServerName appName
                 & setGracefulShutdownTimeout (Just 10) -- TODO add to config
@@ -224,7 +240,7 @@ runWebexWebhookAPI = do
     ws <- replicateM (fromIntegral (cfg ^. webexCfgWebhookEventWorkerCount)) (async worker)
 
     let tlsCerts = tlsSettings (toString (cfg ^. tlsCertFilePath)) (toString (cfg ^. tlsKeyFilePath))
-    liftIO $ runTLS tlsCerts warpSettings (evApp ctx)
+    liftIO $ runTLS tlsCerts warpSettings (evApp ctx shutdown)
 
     mapM_ wait ws
 
