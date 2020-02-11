@@ -20,7 +20,6 @@ import           UnliftIO                hiding ( newChan
                                                 )
 import           UnliftIO.Concurrent            ( ThreadId
                                                 , myThreadId
-                                                , forkIO
                                                 )
 
 -- local
@@ -85,19 +84,16 @@ logEvent ctx ev = do
 
     writeChan q (LogEventWithDetails ts tid ev)
 
-startLogger :: LoggingContext -> IO ()
-startLogger ctx = do
-    _ <- forkIO (loggerWorker ctx)
-    pure ()
+startLogger :: LoggingContext -> IO (Async ())
+startLogger = async . loggerWorker
+
 
 loggerWorker :: LoggingContext -> IO ()
 loggerWorker ctx = do
     ev <- readChan (ctx ^. loggingCtxOutEv)
-    let enabled = ctx ^. loggingCfg . loggingEnabled
 
-    if enabled
-        then do
-            print ev
+    if ctx ^. loggingCfg . loggingEnabled then
+        print ev
         else pure ()
 
     loggerWorker ctx

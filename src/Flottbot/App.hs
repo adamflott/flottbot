@@ -8,6 +8,9 @@ module Flottbot.App
     , argsVersion
     , getArgs
     , AppContext
+    , appCtxArgs
+    , appCtxCfg
+    , appCtxCmds
     , commandTimeoutInSeconds
     , Config(..)
     , webexCfgWebhookListen
@@ -55,24 +58,24 @@ import           Flottbot.Logging
 
 data Args = Args {
     _argsConfigFilePath :: !(Maybe FilePath)
-    , _argsVersion :: !Bool
+    , _argsVersion      :: !Bool
     } deriving Show
 
 makeLenses ''Args
 
 
 data WebexContext = WebexContext {
-   _webexCtxQueueInEv  :: InChan WebhookNotify
+   _webexCtxQueueInEv   :: InChan WebhookNotify
   , _webexCtxQueueOutEv :: OutChan WebhookNotify
 }
 
 makeLenses ''WebexContext
 
 data AppContext = AppContext {
-  _appCtxArgs   :: !Args
-  , _appCtxCfg  :: !Config
-  , _appCtxCmds :: !Commands
-  , _appCtxLog  :: !LoggingContext
+  _appCtxArgs    :: !Args
+  , _appCtxCfg   :: !Config
+  , _appCtxCmds  :: !Commands
+  , _appCtxLog   :: !LoggingContext
   , _appCtxWebex :: !WebexContext
   }
 
@@ -107,16 +110,6 @@ getCfg = asks _appCtxCfg
 
 --
 
-newAppCtx :: Args -> Config -> Commands -> LoggingContext -> IO AppContext
-newAppCtx args cfg cmds logCtx = do
-    wctx <- newWebexCtx cfg
-    pure $ AppContext args cfg cmds logCtx wctx
-
-getCtx :: App AppContext
-getCtx = ask
-
---
-
 commandsLoad :: IO (Either [String] Commands)
 commandsLoad = do
     (errs, _cmds) <- liftIO loadIndexes
@@ -140,3 +133,15 @@ getWebexCtx = asks _appCtxWebex
 
 getLogCtx :: App LoggingContext
 getLogCtx = asks _appCtxLog
+
+--
+
+newAppCtx :: Args -> Config -> Commands -> LoggingContext -> IO AppContext
+newAppCtx args cfg cmds logCtx = do
+    wctx <- newWebexCtx cfg
+    pure $ AppContext args cfg cmds logCtx wctx
+
+getCtx :: App AppContext
+getCtx = ask
+
+--
